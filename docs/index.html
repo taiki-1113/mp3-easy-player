@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0b1014">
+  <meta name="description" content="VoiceOverで、取り込み・曲選択・再生操作・削除の画面を確認するためのモックです。">
+  <title>MP3かんたんプレイヤー・画面モック</title>
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <header class="brand"><p>MP3かんたんプレイヤー <span class="badge">画面モック</span></p></header>
+  <p class="mock-note" id="mock-note">サンプルで操作を確認できます。音楽は流れません。実際のファイルは変更しません。</p>
+  <main id="app" aria-describedby="mock-note">
+    <h1>読み込み中</h1>
+    <p>画面を準備しています。</p>
+  </main>
+  <noscript><p>このモックの操作にはJavaScriptが必要です。</p></noscript>
+  <div id="announcement" role="status" aria-atomic="true" class="sr-only"></div>
+  <dialog id="confirm-dialog" aria-labelledby="confirm-title" aria-describedby="confirm-description">
+    <h2 id="confirm-title">削除の確認</h2>
+    <p id="confirm-description"></p>
+    <p>microSDの原本は残ります。このモックではサンプル一覧だけが変わります。</p>
+    <div class="dialog-actions">
+      <button type="button" id="cancel-delete" autofocus>キャンセル</button>
+      <button type="button" class="danger" id="confirm-delete">削除する</button>
+    </div>
+  </dialog>
+  <footer><p>操作の見本です。再読み込みすると最初のサンプルに戻ります。</p></footer>
+</body>
+</html>

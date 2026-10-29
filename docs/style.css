@@ -1,0 +1,60 @@
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", sans-serif;
+  color: #f2f6f8;
+  background: #0b1014;
+  font-size: 18px;
+  line-height: 1.65;
+  color-scheme: dark;
+  --accent: #25d1da;
+  --line: #596d78;
+  --panel: #141e25;
+  --control: #1b2932;
+  --muted: #bfccd3;
+}
+* { box-sizing: border-box; }
+body { margin: 0 auto; max-width: 38rem; padding: 1.2rem 1rem 2rem; }
+.brand p { margin: 0 0 .8rem; font-weight: 700; font-size: .94rem; }
+.badge { margin-inline-start: .4rem; padding: .2rem .45rem; border: 1px solid var(--line); border-radius: .3rem; font-weight: 500; white-space: nowrap; color: var(--accent); }
+.mock-note, footer { font-size: .85rem; color: var(--muted); }
+.mock-note { margin: 0 0 1.3rem; }
+main { background: var(--panel); padding: 1.4rem; border: 1px solid var(--line); border-radius: .7rem; }
+h1 { margin: 0 0 .4rem; font-size: 1.6rem; line-height: 1.4; }
+h2 { margin: 1.4rem 0 .5rem; font-size: 1.13rem; line-height: 1.5; }
+p { margin: .5rem 0 1rem; overflow-wrap: anywhere; }
+button, select { font: inherit; color: inherit; min-height: 52px; border-radius: .4rem; }
+button { cursor: pointer; background: var(--control); border: 1.5px solid #788c97; padding: .7rem .9rem; text-align: center; touch-action: manipulation; }
+button:hover { background: #283b47; }
+button:focus-visible, select:focus-visible, summary:focus-visible, [tabindex="-1"]:focus-visible { outline: 3px solid #6be6ed; outline-offset: 4px; }
+button[aria-disabled="true"] { background: #172127; color: #a9b9c3; border-color: var(--line); cursor: default; }
+button.primary { background: var(--accent); color: #082429; border-color: var(--accent); font-weight: 700; }
+button.primary:hover { background: #69e1e7; }
+button.danger { color: #ffb8ae; border-color: #ed998e; }
+button.danger:hover { background: #3d2427; }
+.home-actions, .stack { display: grid; gap: .8rem; margin: 1.2rem 0; }
+.home-actions button { min-height: 76px; font-size: 1.16rem; }
+.subtle { font-size: .9rem; color: var(--muted); }
+.playback { padding: 1rem; border: 1px solid var(--line); border-radius: .5rem; margin: 1rem 0 1.4rem; background: #10191f; }
+.playback h2 { margin: 0; }
+.transport { display: grid; gap: .6rem; grid-template-columns: 1fr 1fr; }
+.transport .primary { grid-column: 1 / -1; }
+.playing-name { font-size: 1.13rem; font-weight: 700; margin-bottom: .25rem; }
+.playback .state { font-size: .9rem; margin-bottom: .8rem; }
+label { display: block; font-weight: 700; margin: .8rem 0 .3rem; }
+select { display: block; background: var(--control); border: 1.5px solid #788c97; padding: .5rem; width: 100%; }
+ul { list-style: none; padding: 0; margin: .5rem 0 1.2rem; }
+li + li { border-top: 1px solid var(--line); }
+.row { width: 100%; border: 0; background: transparent; text-align: start; padding: .9rem .2rem; border-radius: .15rem; display: block; }
+.row .title { display: block; overflow-wrap: anywhere; font-weight: 600; }
+.row .detail { display: block; color: var(--muted); font-size: .87rem; margin-top: .2rem; }
+.row[aria-current="true"] { border-inline-start: 4px solid var(--accent); padding-inline-start: .6rem; }
+.back { width: 100%; margin-top: 1.3rem; }
+.section-actions { display: grid; gap: .7rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+.result { padding: 1rem; border: 1px solid var(--line); border-radius: .4rem; background: #10292e; }
+dialog { color: #f2f6f8; background: var(--panel); width: min(92vw, 32rem); border: 1px solid #788c97; border-radius: .6rem; padding: 1.4rem; max-height: 90vh; overflow: auto; }
+dialog::backdrop { background: #03070bcc; }
+dialog h2 { margin-top: 0; }
+.dialog-actions { display: grid; gap: .8rem; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+footer { margin-top: 1.2rem; }
+@media (max-width: 350px) { body { padding-inline: .6rem; } main { padding: 1rem; } }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
