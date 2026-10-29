@@ -12,20 +12,25 @@ function contrast(a, b) {
   const [light, dark] = [luminance(a), luminance(b)].sort((x, y) => y - x);
   return (light + 0.05) / (dark + 0.05);
 }
-test('暗色テーマの文字と主要操作・削除操作が4.5:1以上', () => {
-  const pairs = [
-    ['#f2f6f8', '#141e25'], ['#bfccd3', '#141e25'],
-    ['#bfccd3', '#0b1014'], ['#082429', '#25d1da'],
-    ['#ffb8ae', '#1b2932'], ['#a9b9c3', '#172127'],
-  ];
-  for (const [text, background] of pairs) {
-    assert.ok(css.includes(text) && css.includes(background), 'Checked palette must exist in stylesheet');
-    assert.ok(contrast(text, background) >= 4.5, `${text} on ${background}`);
-  }
-});
-test('フォーカス枠・操作境界が隣接背景に対して3:1以上', () => {
-  for (const [color, background] of [['#6be6ed', '#141e25'], ['#788c97', '#1b2932'], ['#596d78', '#141e25']]) {
-    assert.ok(css.includes(color) && css.includes(background));
-    assert.ok(contrast(color, background) >= 3, `${color} on ${background}`);
-  }
-});
+const palettes = [...css.matchAll(/:root\s*\{([^}]+)\}/g)].map(match =>
+  Object.fromEntries([...match[1].matchAll(/--([\w-]+):\s*(#[a-f\d]{6})/gi)].map(value => [value[1], value[2]])));
+assert.equal(palettes.length, 2, 'Both light and dark palette must be checked');
+for (const [index, palette] of palettes.entries()) {
+  const theme = index === 0 ? '明色' : '暗色';
+  test(`${theme}の文字・補足・主要操作・削除操作が7:1以上`, () => {
+    const pairs = [
+      ...['panel', 'page', 'control', 'hover', 'player', 'selected', 'result'].flatMap(background => [['text', background], ['muted', background]]),
+      ['accent-text', 'accent'], ['accent-text', 'accent-hover'],
+      ['danger', 'control'], ['danger', 'danger-hover'],
+      ['disabled-text', 'disabled-bg'],
+    ];
+    for (const [text, background] of pairs) {
+      assert.ok(contrast(palette[text], palette[background]) >= 7, `${theme}: ${text} on ${background}`);
+    }
+  });
+  test(`${theme}のフォーカス枠・操作境界が3:1以上`, () => {
+    const pairs = ['panel', 'page', 'player'].flatMap(background => [['focus', background], ['border', background], ['line', background]]);
+    pairs.push(['border', 'control'], ['accent', 'selected']);
+    for (const [color, background] of pairs) assert.ok(contrast(palette[color], palette[background]) >= 3, `${theme}: ${color} on ${background}`);
+  });
+}
