@@ -1,9 +1,9 @@
-import { entries, sortedFolders, createPlayer, selectTrack, selectAllTracks, setPlaybackOrder, step, reconcilePlayer } from './model.js?v=20261101-3';
-import { readLibrary, readTrack, storeTrack, deleteFromLibrary } from './storage.js?v=20261101-3';
-import { hashBlob } from './sha256.js?v=20261101-3';
-import { validateMp3, sourceInfo } from './mp3.js?v=20261101-3';
+import { entries, sortedFolders, createPlayer, selectTrack, selectAllTracks, setPlaybackOrder, step, reconcilePlayer } from './model.js?v=20261101-4';
+import { readLibrary, readTrack, storeTrack, deleteFromLibrary } from './storage.js?v=20261101-4';
+import { hashBlob } from './sha256.js?v=20261101-4';
+import { validateMp3, sourceInfo } from './mp3.js?v=20261101-4';
 
-const VERSION='20261101-3', base=new URL('./',location.href);
+const VERSION='20261101-4', base=new URL('./',location.href);
 const app=document.querySelector('#app'), status=document.querySelector('#announcement');
 const dialog=document.querySelector('#confirm-dialog'), audio=document.querySelector('#audio');
 const folderInput=document.querySelector('#folder-input'), filesInput=document.querySelector('#files-input');
@@ -41,37 +41,41 @@ function playbackState() {
 function playback() {
   const item=current(), unavailable=item?'':'aria-disabled="true"';
   return `<section class="playback" aria-label="再生操作"><div class="transport">
-  ${button('play',player.playing?'一時停止':'再生','primary',(item||canStartAll()?'':'aria-disabled="true"')+' aria-describedby="playback-state"')}
+  ${button('play',player.playing?'一時停止':'再生','primary',item||canStartAll()?'':'aria-disabled="true"')}
   ${button('next','次の曲','',unavailable)}${button('previous','前の曲','',unavailable)}</div>
-  <p class="playing-name" id="current-name">${item?esc(item.name):canStartAll()?'すべての曲':'曲を選んでください'}</p>
-  <p class="state" id="playback-state">${esc(playbackState())}</p>
+  <div id="playback-summary" role="group" tabindex="0" aria-label="${esc(playbackSummary())}">
+  <p class="playing-name" id="current-name" aria-hidden="true">${item?esc(item.name):canStartAll()?'すべての曲':'曲を選んでください'}</p>
+  <p class="state" id="playback-state" aria-hidden="true">${esc(playbackState())}</p></div>
+  <details><summary>再生の詳細</summary>
   <p class="subtle" id="playback-time">${item?`${time(audio.currentTime)}／${time(audio.duration)}`:''}</p>
-  <p class="subtle" id="queue-info" ${item?'':'hidden'}>${item?esc(queueDescription()):''}</p></section>`;
+  <p class="subtle" id="queue-info" ${item?'':'hidden'}>${item?esc(queueDescription()):''}</p></details></section>`;
 }
+function playbackSummary(){return current()?`${current().name}。${playbackState()}`:playbackState();}
+function trackLabel(item,deletion=false){return `${item.name}${view==='all'?'、'+item.folder:''}${deletion?'、削除':current()?.id===item.id?'、'+(player.playing?'再生中':'選択中'):''}`;}
 function rowDetail(item,deletion=false) {
   return esc((deletion?'削除の確認へ':current()?.id===item.id?(player.playing?'再生中':'選択中'):'選んで再生')+(view==='all'?' ・ '+item.folder:''));
 }
 function rows(items,deletion=false) {
   if(!items.length)return '<p>曲がありません。取り込み画面から追加できます。</p>';
-  return `<ul aria-label="${deletion?'削除する曲':'曲の一覧'}">${items.map((item,index)=>`<li><button type="button" class="row" id="track-${item.id}" data-${deletion?'delete':'track'}="${item.id}" ${!deletion&&current()?.id===item.id?'aria-current="true"':''} aria-label="${esc(item.name)}${view==='all'?'、'+esc(item.folder):''}、${items.length}曲中${index+1}曲目、${deletion?'削除の確認へ':'再生する'}"><span class="title">${esc(item.name)}</span><span class="detail">${rowDetail(item,deletion)}</span></button></li>`).join('')}</ul>`;
+  return `<ul aria-label="${deletion?'削除する曲':'曲の一覧'}">${items.map(item=>`<li><button type="button" class="row" id="track-${item.id}" data-${deletion?'delete':'track'}="${item.id}" ${!deletion&&current()?.id===item.id?'aria-current="true"':''} aria-label="${esc(trackLabel(item,deletion))}"><span class="title" aria-hidden="true">${esc(item.name)}</span><span class="detail" aria-hidden="true">${rowDetail(item,deletion)}</span></button></li>`).join('')}</ul>`;
 }
 function render(focusId=null) {
   clearTimeout(announcementTimer);status.textContent='';
   if(fatal)app.innerHTML=`${heading('保存先を開けません')}<p>${esc(fatal)}</p>${button('retry','もう一度試す','primary')}`;
-  else if(screen==='home')app.innerHTML=`${heading('音楽を楽しむ')}<p>聴く、取り込む。ここから始めます。</p><div class="home-actions">${button('listen','音楽を聴く','primary','aria-describedby="library-count"')}${button('import','音楽を取り込む')}</div><p class="subtle" id="library-count">保存済み${entries(library).length}曲・${library.folders.length}フォルダ</p>`;
+  else if(screen==='home')app.innerHTML=`${heading('音楽を楽しむ')}<div class="home-actions">${button('listen','音楽を聴く','primary')}${button('import','音楽を取り込む')}</div><p class="subtle" id="library-count">${entries(library).length}曲・${library.folders.length}フォルダ</p>`;
   else if(screen==='library') {
     const atFolders=view==='folders'&&folder===null;
-    if(managing)app.innerHTML=`${heading('曲の削除')}<p>削除する曲を選びます。確認するまでは削除されません。</p><p class="subtle">${view==='all'?'すべての曲：削除すると、すべてのフォルダから外れます。':esc(folder)+'：別のフォルダにある曲は残ります。'}</p>${button('manage-done','削除を終えて曲一覧へ戻る')}${rows(entries(library,modeFolder()),true)}${folder&&view==='folders'?button('delete-folder','このフォルダをまとめて削除','danger'):''}${back}`;
+    if(managing)app.innerHTML=`${heading('曲の削除')}<p class="subtle">${view==='all'?'すべてのフォルダから削除します。':esc(folder)+'から削除します。別フォルダの曲は残ります。'}</p>${button('manage-done','曲一覧へ戻る')}${rows(entries(library,modeFolder()),true)}${folder&&view==='folders'?button('delete-folder','このフォルダをまとめて削除','danger'):''}${back}`;
     else {
       const items=atFolders?[]:entries(library,modeFolder());
-      app.innerHTML=`${heading('音楽を聴く')}${playback()}<label for="view-mode">曲の表示方法</label><select id="view-mode"><option value="folders" ${view==='folders'?'selected':''}>フォルダ別</option><option value="all" ${view==='all'?'selected':''}>すべての曲</option></select>
-      ${view==='all'?`<label for="play-order">すべての曲の再生方法</label><select id="play-order" aria-describedby="order-help"><option value="ordered" ${allOrder==='ordered'?'selected':''}>順番に再生</option><option value="shuffle" ${allOrder==='shuffle'?'selected':''}>シャッフル再生</option></select><p class="subtle" id="order-help">一覧の並びは変えず、再生する順番を切り替えます。</p>`:''}
+      app.innerHTML=`${heading('音楽を聴く')}${playback()}<label for="view-mode" aria-hidden="true">曲の表示方法</label><select id="view-mode" aria-label="曲の表示方法"><option value="folders" ${view==='folders'?'selected':''}>フォルダ別</option><option value="all" ${view==='all'?'selected':''}>すべての曲</option></select>
+      ${view==='all'?`<label for="play-order" aria-hidden="true">すべての曲の再生方法</label><select id="play-order" aria-label="すべての曲の再生方法"><option value="ordered" ${allOrder==='ordered'?'selected':''}>順番に再生</option><option value="shuffle" ${allOrder==='shuffle'?'selected':''}>シャッフル再生</option></select>`:''}
       <h2 id="list-title" tabindex="-1">${atFolders?'フォルダを選ぶ':esc(view==='all'?'すべての曲':folder)}</h2>
-      ${atFolders?(library.folders.length?`<ul aria-label="フォルダ一覧">${sortedFolders(library).map((name,index)=>`<li><button type="button" class="row" id="folder-${index}" data-folder="${esc(name)}"><span class="title">${esc(name.replaceAll('/',' ／ '))}</span><span class="detail">${entries(library,name).length}曲</span></button></li>`).join('')}</ul>`:'<p>まだ曲がありません。「音楽を取り込む」からフォルダを選んでください。</p>'):`<p class="subtle">${items.length}曲。${view==='all'?'フォルダ名順、各フォルダ内はファイル名順。':'ファイル名順。'}</p>${folder?button('folders','フォルダ一覧へ戻る'):''}${rows(items)}`}
+      ${atFolders?(library.folders.length?`<ul aria-label="フォルダ一覧">${sortedFolders(library).map((name,index)=>`<li><button type="button" class="row" id="folder-${index}" data-folder="${esc(name)}"><span class="title">${esc(name.replaceAll('/',' ／ '))}</span><span class="detail">${entries(library,name).length}曲</span></button></li>`).join('')}</ul>`:'<p>曲がありません。「音楽を取り込む」から追加してください。</p>'):`${folder?button('folders','フォルダ一覧へ戻る'):''}${rows(items)}`}
       <div class="section-actions">${!atFolders&&(items.length||folder)?button('manage','曲を削除する'):''}${!library.members.length?button('import','音楽を取り込む','primary'):''}</div>${back}`;
     }
   } else if(screen==='import') {
-    if(importState==='ready')app.innerHTML=`${heading('音楽を取り込む')}<p>カード内の音楽フォルダを1つ選びます。サブフォルダのMP3もまとめて保存します。</p><p class="subtle">毎回同じ取り込み元フォルダを選んでください。保存中は画面を開いたままにし、カードを外さないでください。</p><div class="stack">${button('choose-folder','取り込み元のフォルダを選ぶ','primary')}</div><details><summary>フォルダを選択できないとき</summary><p>iPhoneのiOSとSafariを確認してください。MP3を複数まとめて選ぶこともできます。</p>${button('choose-files','MP3をまとめて選ぶ')}</details>${back}`;
+    if(importState==='ready')app.innerHTML=`${heading('音楽を取り込む')}<p>毎回同じフォルダを選び、保存中は画面とカード接続を維持してください。</p><div class="stack">${button('choose-folder','取り込み元のフォルダを選ぶ','primary')}</div><details><summary>フォルダを選択できないとき</summary>${button('choose-files','MP3をまとめて選ぶ')}</details>${back}`;
     else if(importState==='running')app.innerHTML=`${heading('取り込み中')}<p id="import-progress" tabindex="-1">取り込みを開始します。</p><p>この画面を開いたままお待ちください。</p>${button('cancel-import','取り込みを中止')}`;
     else {
       const r=result, summary=`${r.stopped?'取り込みを中断しました。':''}新しく${r.newTracks}曲を保存しました。${r.duplicates}件は取り込み済み、失敗${r.failures.length}件、未処理${r.total-r.processed}件です。${r.skipped?'隠しファイルなど'+r.skipped+'件は対象外です。':''}`;
@@ -88,11 +92,13 @@ function updatePlayback(message=null) {
     for(const id of ['play','next','previous']){const e=document.getElementById(id);if(item||(id==='play'&&canStartAll()))e.removeAttribute('aria-disabled');else e.setAttribute('aria-disabled','true');}
     document.getElementById('current-name').textContent=item?.name??(canStartAll()?'すべての曲':'曲を選んでください');
     document.getElementById('playback-state').textContent=playbackState();
+    document.getElementById('playback-summary').setAttribute('aria-label',playbackSummary());
     const info=document.getElementById('queue-info');info.hidden=!item;info.textContent=item?queueDescription():'';
     updateTime();
     app.querySelectorAll('[data-track]').forEach(row=>{
       const entry=entries(library,modeFolder()).find(value=>value.id===row.dataset.track);if(!entry)return;
       if(item?.id===entry.id)row.setAttribute('aria-current','true');else row.removeAttribute('aria-current');
+      row.setAttribute('aria-label',trackLabel(entry));
       row.querySelector('.detail').innerHTML=rowDetail(entry);
     });
   }

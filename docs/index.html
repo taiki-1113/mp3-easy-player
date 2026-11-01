@@ -10,13 +10,12 @@
   <title>MP3かんたんプレイヤー</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css?v=20261101-3">
-  <script type="module" src="./app.js?v=20261101-3"></script>
+  <link rel="stylesheet" href="./style.css?v=20261101-4">
+  <script type="module" src="./app.js?v=20261101-4"></script>
 </head>
 <body>
-  <header class="brand"><p>MP3かんたんプレイヤー</p></header>
-  <p class="mock-note" id="storage-note">音楽はこの端末内に保存します。カードの原本は残ります。</p>
-  <main id="app" aria-describedby="storage-note" aria-busy="true">
+  <header class="brand" aria-hidden="true"><p>MP3かんたんプレイヤー</p></header>
+  <main id="app" aria-busy="true">
     <h1>読み込み中</h1>
     <p>画面を準備しています。</p>
   </main>
@@ -36,6 +35,7 @@
   <input id="files-input" type="file" accept=".mp3,audio/mpeg" multiple hidden aria-label="取り込むMP3">
   <footer>
     <details><summary>初めて使うとき・保存について</summary>
+      <p>音楽は端末内に保存します。カードの原本は残ります。サブフォルダのMP3も取り込みます。</p>
       <p>iPhoneではSafariで開き、共有メニューから「ホーム画面に追加」して使います。初回は通信が必要です。</p>
       <p id="offline-state">オフライン利用の準備を確認しています。</p>
       <p>取り込み元は毎回同じフォルダを選んでください。取り込み中は画面を開いたままにします。フォルダ選択にはiOS 18.4以降が必要です。</p>
