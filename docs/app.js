@@ -1,14 +1,14 @@
-import { entries, sortedFolders, createPlayer, selectTrack, selectAllTracks, setPlaybackOrder, step, reconcilePlayer } from './model.js?v=20261101-4';
-import { readLibrary, readTrack, storeTrack, deleteFromLibrary } from './storage.js?v=20261101-4';
-import { hashBlob } from './sha256.js?v=20261101-4';
-import { validateMp3, sourceInfo } from './mp3.js?v=20261101-4';
+import { entries, sortedFolders, createPlayer, selectTrack, selectAllTracks, setPlaybackOrder, step, reconcilePlayer } from './model.js?v=20261101-5';
+import { readLibrary, readTrack, storeTrack, deleteFromLibrary } from './storage.js?v=20261101-5';
+import { hashBlob } from './sha256.js?v=20261101-5';
+import { validateMp3, sourceInfo } from './mp3.js?v=20261101-5';
 
-const VERSION='20261101-4', base=new URL('./',location.href);
+const VERSION='20261101-5', base=new URL('./',location.href);
 const app=document.querySelector('#app'), status=document.querySelector('#announcement');
 const dialog=document.querySelector('#confirm-dialog'), audio=document.querySelector('#audio');
 const folderInput=document.querySelector('#folder-input'), filesInput=document.querySelector('#files-input');
 let library={folders:[],members:[]}, player=createPlayer();
-let screen='home', view='folders', allOrder='ordered', folder=null, managing=false;
+let screen='home', view='all', allOrder='ordered', folder=null, managing=false;
 let importState='ready', importing=false, abortImport=null, result=null, fatal='';
 let pendingDelete=null, restoreFocusId=null, announcementTimer, deleting=false;
 let sourceToken=0, objectUrl=null, allowedToPlay=false, preparing=false, playbackError='';
@@ -68,7 +68,9 @@ function render(focusId=null) {
     if(managing)app.innerHTML=`${heading('曲の削除')}<p class="subtle">${view==='all'?'すべてのフォルダから削除します。':esc(folder)+'から削除します。別フォルダの曲は残ります。'}</p>${button('manage-done','曲一覧へ戻る')}${rows(entries(library,modeFolder()),true)}${folder&&view==='folders'?button('delete-folder','このフォルダをまとめて削除','danger'):''}${back}`;
     else {
       const items=atFolders?[]:entries(library,modeFolder());
-      app.innerHTML=`${heading('音楽を聴く')}${playback()}<label for="view-mode" aria-hidden="true">曲の表示方法</label><select id="view-mode" aria-label="曲の表示方法"><option value="folders" ${view==='folders'?'selected':''}>フォルダ別</option><option value="all" ${view==='all'?'selected':''}>すべての曲</option></select>
+      app.innerHTML=`${heading('音楽を聴く')}<div class="view-options" role="group" aria-label="曲の表示方法">
+      ${button('view-all','すべての曲',view==='all'?'primary':'',`data-view="all" aria-pressed="${view==='all'}"`)}
+      ${button('view-folders','フォルダ別',view==='folders'?'primary':'',`data-view="folders" aria-pressed="${view==='folders'}"`)}</div>${playback()}
       ${view==='all'?`<label for="play-order" aria-hidden="true">すべての曲の再生方法</label><select id="play-order" aria-label="すべての曲の再生方法"><option value="ordered" ${allOrder==='ordered'?'selected':''}>順番に再生</option><option value="shuffle" ${allOrder==='shuffle'?'selected':''}>シャッフル再生</option></select>`:''}
       <h2 id="list-title" tabindex="-1">${atFolders?'フォルダを選ぶ':esc(view==='all'?'すべての曲':folder)}</h2>
       ${atFolders?(library.folders.length?`<ul aria-label="フォルダ一覧">${sortedFolders(library).map((name,index)=>`<li><button type="button" class="row" id="folder-${index}" data-folder="${esc(name)}"><span class="title">${esc(name.replaceAll('/',' ／ '))}</span><span class="detail">${entries(library,name).length}曲</span></button></li>`).join('')}</ul>`:'<p>曲がありません。「音楽を取り込む」から追加してください。</p>'):`${folder?button('folders','フォルダ一覧へ戻る'):''}${rows(items)}`}
@@ -216,12 +218,16 @@ function askDelete(kind,id,triggerId) {
   dialog.showModal();requestAnimationFrame(()=>focus('cancel-delete'));
 }
 app.addEventListener('change',event=>{
-  if(event.target.id==='view-mode'){view=event.target.value;folder=null;render('view-mode');announce(view==='all'?`すべての曲、${entries(library).length}曲。`:'フォルダ別に切り替えました。');}
   if(event.target.id==='play-order'){allOrder=event.target.value;player=setPlaybackOrder(player,allOrder);updatePlayback(`${orderLabel(allOrder)}を選びました。現在の曲は変わりません。`);}
 });
 app.addEventListener('click',event=>{
   const target=event.target.closest('button');if(!target)return;
   if(target.getAttribute('aria-disabled')==='true'){announce('一覧から曲を選んでください。');return;}
+  if(target.dataset.view){
+    if(view===target.dataset.view&&folder===null)return;
+    view=target.dataset.view;folder=null;render(target.id);
+    announce(view==='all'?`すべての曲、${entries(library).length}曲。`:'フォルダ別に切り替えました。');return;
+  }
   if(target.dataset.folder!==undefined){folder=target.dataset.folder;render('list-title');return;}
   if(target.dataset.track){player=selectTrack(library,modeFolder(),target.dataset.track,allOrder);void startCurrent(true);announce(`「${current().name}」を再生します。`);return;}
   if(target.dataset.delete){askDelete('track',target.dataset.delete,target.id);return;}

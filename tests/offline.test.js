@@ -18,7 +18,7 @@ function worker({ failInstall=false }={}) {
     readTrack:async()=>({blob:new Blob(['0123456789'],{type:'audio/mpeg'})}),
     fetch:async()=>{network++;throw new Error('offline');},
     caches:{open:async()=>cache,keys:async()=>['mp3-easy-player-old','another-app'],delete:async name=>{deleted.push(name);}},
-    self:{location:{href:'https://example.test/mp3-easy-player/sw.js?v=20261101-4'},
+    self:{location:{href:'https://example.test/mp3-easy-player/sw.js?v=20261101-5'},
       addEventListener:(name,fn)=>{handlers[name]=fn;},skipWaiting:async()=>{skipped++;},clients:{claim:async()=>{claimed++;}}},
   };
   const source=readFileSync(new URL('../docs/sw.js',import.meta.url),'utf8').replace(/^import .*;\r?\n/gm,'');

@@ -69,6 +69,8 @@ button.danger:hover { background: var(--danger-hover); }
 button[aria-disabled="true"], button[aria-disabled="true"]:hover { background: var(--disabled-bg); color: var(--disabled-text); border-color: var(--line); border-style: dashed; cursor: default; }
 .home-actions, .stack { display: grid; gap: .8rem; margin: 1.2rem 0; }
 .home-actions button { min-height: 76px; font-size: 1.16rem; }
+.view-options { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-top: 1rem; }
+.view-options button { min-width: 0; padding-inline: .4rem; }
 .subtle { font-size: .9rem; color: var(--muted); }
 .playback { padding: 1rem; border: 1px solid var(--line); border-radius: .5rem; margin: 1rem 0 1.4rem; background: var(--player); }
 .playback h2 { margin: 0; }
