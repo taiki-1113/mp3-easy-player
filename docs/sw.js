@@ -1,6 +1,6 @@
-import { readTrack } from './storage.js?v=20261101-1';
-import { audioResponse } from './media-response.js?v=20261101-1';
-const VERSION='20261101-1';
+import { readTrack } from './storage.js?v=20261101-2';
+import { audioResponse } from './media-response.js?v=20261101-2';
+const VERSION='20261101-2';
 const CACHE=`mp3-easy-player-${VERSION}`;
 const base=new URL('./',self.location.href);
 const assets=['./','./index.html','./style.css?v='+VERSION,'./app.js?v='+VERSION,'./model.js?v='+VERSION,'./storage.js?v='+VERSION,'./sha256.js?v='+VERSION,'./mp3.js?v='+VERSION,'./media-response.js?v='+VERSION,'./manifest.webmanifest','./icon.svg'];

@@ -1,6 +1,7 @@
+import { initialLibrary, importSample } from './fixtures.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { initialLibrary, entries, importSample, removeTrack, removeFolder, selectTrack, setPlaybackOrder, step, reconcilePlayer } from '../docs/model.js';
+import { entries, removeTrack, removeFolder, selectTrack, setPlaybackOrder, step, reconcilePlayer } from '../docs/model.js';
 
 test('同一内容は全曲一覧で1回、各フォルダではそれぞれ表示する', () => {
   const library = initialLibrary();

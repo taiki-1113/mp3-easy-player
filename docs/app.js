@@ -1,9 +1,9 @@
-import { entries, sortedFolders, createPlayer, selectTrack, setPlaybackOrder, step, reconcilePlayer } from './model.js?v=20261101-1';
-import { readLibrary, readTrack, storeTrack, deleteFromLibrary } from './storage.js?v=20261101-1';
-import { hashBlob } from './sha256.js?v=20261101-1';
-import { validateMp3, sourceInfo } from './mp3.js?v=20261101-1';
+import { entries, sortedFolders, createPlayer, selectTrack, setPlaybackOrder, step, reconcilePlayer } from './model.js?v=20261101-2';
+import { readLibrary, readTrack, storeTrack, deleteFromLibrary } from './storage.js?v=20261101-2';
+import { hashBlob } from './sha256.js?v=20261101-2';
+import { validateMp3, sourceInfo } from './mp3.js?v=20261101-2';
 
-const VERSION='20261101-1', base=new URL('./',location.href);
+const VERSION='20261101-2', base=new URL('./',location.href);
 const app=document.querySelector('#app'), status=document.querySelector('#announcement');
 const dialog=document.querySelector('#confirm-dialog'), audio=document.querySelector('#audio');
 const folderInput=document.querySelector('#folder-input'), filesInput=document.querySelector('#files-input');
@@ -271,8 +271,17 @@ async function setupOffline() {
   const element=document.getElementById('offline-state');
   if(!('serviceWorker' in navigator)){element.textContent='オフライン起動の準備ができません。Safariで開いてください。';return;}
   try {
-    await navigator.serviceWorker.register(new URL('sw.js?v='+VERSION,base),{type:'module',scope:base.pathname,updateViaCache:'none'});
-    await navigator.serviceWorker.ready;
+    const url=new URL('sw.js?v='+VERSION,base);
+    const registration=await navigator.serviceWorker.register(url,{type:'module',scope:base.pathname,updateViaCache:'none'});
+    // An older active worker does not prove the current release was cached.
+    const worker=registration.installing||registration.waiting||registration.active;
+    if(!worker||worker.scriptURL!==url.href)throw new Error('更新の準備待ち');
+    await new Promise((resolve,reject)=>{
+      const finish=error=>{clearTimeout(timer);worker.removeEventListener('statechange',check);error?reject(error):resolve();};
+      const check=()=>{if(worker.state==='activated')finish();else if(worker.state==='redundant')finish(new Error('資材を保存できません'));};
+      const timer=setTimeout(()=>finish(new Error('準備が終わりません')),30000);
+      worker.addEventListener('statechange',check);check();
+    });
     element.textContent='オフライン利用の準備ができました。保存した曲は通信なしで再生できます。';
   }catch{element.textContent='オフラインの準備が完了していません。通信できる状態で画面を読み込み直してください。保存済みの曲は残っています。';}
 }
