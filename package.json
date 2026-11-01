@@ -1,6 +1,6 @@
 {
-  "name": "mp3-easy-player-screen-mock",
-  "version": "0.1.0",
+  "name": "mp3-easy-player",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": { "test": "node --test tests/*.test.js" }

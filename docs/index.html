@@ -6,15 +6,17 @@
   <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#f4f5f7" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#161616" media="(prefers-color-scheme: dark)">
-  <meta name="description" content="VoiceOverで、取り込み・曲選択・再生操作・削除の画面を確認するためのモックです。">
-  <title>MP3かんたんプレイヤー・画面モック</title>
-  <link rel="stylesheet" href="./style.css?v=20261030-high-contrast">
-  <script type="module" src="./app.js"></script>
+  <meta name="description" content="MP3をフォルダからまとめて端末内に保存し、VoiceOverで操作できる音楽プレイヤー。">
+  <title>MP3かんたんプレイヤー</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css?v=20261101-1">
+  <script type="module" src="./app.js?v=20261101-1"></script>
 </head>
 <body>
-  <header class="brand"><p>MP3かんたんプレイヤー <span class="badge">画面モック</span></p></header>
-  <p class="mock-note" id="mock-note">サンプルで操作を確認できます。音楽は流れません。実際のファイルは変更しません。</p>
-  <main id="app" aria-describedby="mock-note">
+  <header class="brand"><p>MP3かんたんプレイヤー</p></header>
+  <p class="mock-note" id="storage-note">音楽はこの端末内に保存します。カードの原本は残ります。</p>
+  <main id="app" aria-describedby="storage-note" aria-busy="true">
     <h1>読み込み中</h1>
     <p>画面を準備しています。</p>
   </main>
@@ -23,12 +25,24 @@
   <dialog id="confirm-dialog" aria-labelledby="confirm-title" aria-describedby="confirm-description">
     <h2 id="confirm-title">削除の確認</h2>
     <p id="confirm-description"></p>
-    <p>microSDの原本は残ります。このモックではサンプル一覧だけが変わります。</p>
+    <p>microSDの原本は残ります。同じフォルダを取り込み直すと、曲を再び保存できます。</p>
     <div class="dialog-actions">
       <button type="button" id="cancel-delete" autofocus>キャンセル</button>
       <button type="button" class="danger" id="confirm-delete">削除する</button>
     </div>
   </dialog>
-  <footer><p>操作の見本です。再読み込みすると最初のサンプルに戻ります。</p></footer>
+  <audio id="audio" preload="auto" playsinline aria-hidden="true"></audio>
+  <input id="folder-input" type="file" webkitdirectory multiple hidden aria-label="取り込み元のフォルダ">
+  <input id="files-input" type="file" accept=".mp3,audio/mpeg" multiple hidden aria-label="取り込むMP3">
+  <footer>
+    <details><summary>初めて使うとき・保存について</summary>
+      <p>iPhoneではSafariで開き、共有メニューから「ホーム画面に追加」して使います。初回は通信が必要です。</p>
+      <p id="offline-state">オフライン利用の準備を確認しています。</p>
+      <p>取り込み元は毎回同じフォルダを選んでください。取り込み中は画面を開いたままにします。フォルダ選択にはiOS 18.4以降が必要です。</p>
+      <p>ブラウザのデータ削除や容量の状況によって保存した音楽が失われる場合があります。Windowsとカードに原本を残してください。</p>
+      <p>画面をロックしたままの連続再生やVoiceOverの読み上げは、ご利用のiPhoneでも確認してください。</p>
+      <button id="reload-app" type="button">画面を読み込み直す</button>
+    </details>
+  </footer>
 </body>
 </html>
