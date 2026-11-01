@@ -1,4 +1,4 @@
-import { removeTrack, removeFolder } from './model.js?v=20261101-2';
+import { removeTrack, removeFolder } from './model.js?v=20261101-3';
 export const DATABASE = 'mp3-easy-player';
 let opening;
 const empty = () => ({ folders:[], members:[], revision:0 });

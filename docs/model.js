@@ -42,6 +42,12 @@ export function selectTrack(library, folder, id, order = 'ordered', random = Mat
   if (index < 0) return createPlayer();
   return setPlaybackOrder({ queue, index, context: folder, playing: true, order: 'ordered' }, folder === null ? order : 'ordered', random);
 }
+export function selectAllTracks(library, order = 'ordered', random = Math.random) {
+  const items = entries(library);
+  if (!items.length) return createPlayer();
+  const first = items[order === 'shuffle' ? Math.floor(random() * items.length) : 0];
+  return selectTrack(library, null, first.id, order, random);
+}
 export function step(player, delta) {
   if (!player.queue.length) return createPlayer();
   return { ...player, index: ((player.index + delta) % player.queue.length + player.queue.length) % player.queue.length };

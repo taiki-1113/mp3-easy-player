@@ -1,7 +1,28 @@
 import { initialLibrary, importSample } from './fixtures.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { entries, removeTrack, removeFolder, selectTrack, setPlaybackOrder, step, reconcilePlayer } from '../docs/model.js';
+import { entries, removeTrack, removeFolder, selectTrack, selectAllTracks, setPlaybackOrder, step, reconcilePlayer } from '../docs/model.js';
+
+test('曲を指定しない全曲再生は自然順の先頭から全実体を再生する', () => {
+  const library=initialLibrary(), player=selectAllTracks(library);
+  assert.equal(player.context,null);
+  assert.equal(player.queue[player.index].id,entries(library)[0].id);
+  assert.deepEqual(player.queue,entries(library));
+  assert.equal(player.playing,true);
+});
+
+test('曲を指定しないシャッフルは最初の曲もランダムに選び、実体を重複させない', () => {
+  const library=initialLibrary(), player=selectAllTracks(library,'shuffle',()=>0.75);
+  assert.equal(player.order,'shuffle');
+  assert.equal(player.queue[0].id,entries(library)[3].id);
+  assert.equal(new Set(player.queue.map(item=>item.id)).size,entries(library).length);
+});
+
+test('空のライブラリで全曲再生を要求しても停止状態を維持する', () => {
+  const player=selectAllTracks({folders:[],members:[]},'shuffle');
+  assert.equal(player.playing,false);
+  assert.equal(player.queue.length,0);
+});
 
 test('同一内容は全曲一覧で1回、各フォルダではそれぞれ表示する', () => {
   const library = initialLibrary();
